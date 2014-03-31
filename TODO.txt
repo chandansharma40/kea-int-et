@@ -1,0 +1,5 @@
+1. Algoritmen for "Bar Graph", status=?
+
+2. Set time, status=?
+
+And so on...........
