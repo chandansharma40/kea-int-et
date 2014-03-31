@@ -155,7 +155,7 @@ int main (void)
 
 	if (runTime)
 	{
-		TIME_value(); // call the task function
+		TIME_Tick(); // call the task function
 		char time_string[4];
 
 		// Seconds

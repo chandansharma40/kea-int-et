@@ -2,67 +2,101 @@
 #include <avr/interrupt.h>
 #include "clock.h"
 
-unsigned char ss=0, mm=0, hh=0;
+
+struct Clock_time
+{
+	int seconds;
+	int minutes;
+	int hours ;
+} ;
+
+struct Clock_time clock_time;
 
 /***********************/
 //TIME_value
 /***********************/
-void TIME_value (void)
+void TIME_Tick (void)
 {
 	// Every 10 ms, 
-	ss++;
-	if (ss >= 60)
+	clock_time.seconds++;
+	if (clock_time.seconds >= 60)
 	{
-		ss=0;
-		mm++;
+		clock_time.seconds=0;
+		clock_time.minutes++;
 	}
-	if (mm >= 60)
+	if (clock_time.minutes >= 60)
 	{
-		hh++;
-		mm=0;
+		clock_time.hours++;
+		clock_time.minutes=0;
 	}
-	if (hh == 24)
+	if (clock_time.hours == 24)
 	{
-		hh = 0;
+		clock_time.hours = 0;
 	}
 }
 
 /***********************/
-//TIME_value
+//TIME_GetSeconds -> Returns seconds
 /***********************/
 int TIME_GetSeconds (void)
 {
-	return ss;
+	return clock_time.seconds;
 }
 /***********************/
-//TIME_value
+//TIME_GetMinutes -> Returns minutes
 /***********************/
 int TIME_GetMinutes (void)
 {
-	return mm;
+	return clock_time.minutes;;
 }
 /***********************/
-//TIME_value
+//TIME_GetHours -> Returns hours
 /***********************/
 int TIME_GetHours (void)
 {
-	return hh;
+	return clock_time.hours;
 }
 
 /***********************/
-//Timer / clock
+//TIME_SetSeconds -> Set Seconds to value given
+/***********************/
+void TIME_SetSeconds (int value)
+{
+	clock_time.seconds = value;
+}
+
+/***********************/
+//TIME_SetMinutes -> Set Minutes to value given
+/***********************/
+void TIME_SetMinutes (int value)
+{
+	clock_time.minutes = value;
+}
+
+/***********************/
+//TIME_SetHours -> Set Hours to value given
+/***********************/
+void TIME_SetHours (int value)
+{
+	clock_time.hours = value;
+}
+
+
+/***********************/
+// Initialization of Timer / clock
 /***********************/
 void timer1_init()
 {
 	TCCR1A = 0b00000000;
-
 	TCCR1B = 0b00001010;
-
-    TIMSK  = 0b00010000;
+	TIMSK  = 0b00010000;
 
 	OCR1A = 19999; //gives interrupt every 10ms
 	
 	TCNT1  = 0b00000000;
-	
 	sei(); // enable global interrupts
+
+	clock_time.seconds = 0;
+	clock_time.minutes = 0;
+	clock_time.hours   = 0;
 }
