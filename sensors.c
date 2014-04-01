@@ -1,8 +1,12 @@
+/***********************/
+// Sensors driver
+/***********************/
+
 #include <avr/io.h>
 #include <stdlib.h>
 
 /***********************/
-// Sensors
+// AC TO DC(ADC) Init
 /***********************/
 int ADC_init (int channel)
 { switch (channel)
