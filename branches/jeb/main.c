@@ -1,10 +1,13 @@
+/***********************/
+// MAIN Program
+/***********************/
+#include "defines.h"
 #include <avr/io.h>
 #include <util/delay.h>
 #include <string.h>
 #include <stdlib.h>
-#include <avr/interrupt.h>
-#include "defines.h"
-#include "keyboard.h"
+#include <avr/interrupt.h>	
+#include "kbd.h"
 #include "LCD.h"
 #include "sensors.h"
 #include "clock.h"
@@ -16,19 +19,22 @@
 #define INTERVAL_LIGHT 25
 #define INTERVAL_KEY 20
 
+
+// Task/Schedule variabls
 bool runTemp = false;
 bool runTime = false;
 bool runLight = false;
 bool runKey = false;
 
+// Timing variables
 char countTemp = 50;
 char countTime = 10;
 char countLight = 25;
 char countKey = 20;
 
-// rename to ??
-char number;
-char prev_number; // = 'D'; // 'D' is a dummy to enable check of previous character
+// Keyboard variabls
+char keyPressed;
+char prevKeyPressed; // = 'D'; // 'D' is a dummy to enable check of previous character
 
 /***********************/
 // Interrupt
@@ -80,45 +86,26 @@ int main (void)
 {  
 
 	int toggle = 1;
-
   	uP_init(); // Microprocessor init
-
 	LCD_init(); // LCD init
-
 	LCD_BL(toggle); // Turn on backlight
-
 	LCD_cmd(0x0F); // Blink cursor
-
 	timer1_init();
 
 	
 	// Set up our menu
 	LCD_goto(3,1);
-
 	LCD_string(":");
-
 	LCD_goto(6,1);
-
 	LCD_string(":");
-
 	LCD_goto(11,1);
-
 	LCD_string("T:");
-
 	LCD_goto(15,1);
-
 	LCD_string(".00");
-
 	LCD_goto(18,1);
-
 	LCD_string("*");
-
 	LCD_goto(1,2);
-
 	LCD_string("LDR:");
-
-
-
 
 	while (1)
 	{
@@ -152,7 +139,6 @@ int main (void)
 	}
 
 	//Time
-
 	if (runTime)
 	{
 		TIME_Tick(); // call the task function
@@ -176,5 +162,15 @@ int main (void)
 		runTime = false; // clear the run flag
 
 	}
-   }
+
+	// Keyboard handler
+	if (runKey)
+	{
+		// If any key is pressed
+		if (KBD_isKeyPressed())
+		{
+			keyPressed = KBD_GetKey();
+		}
+	}
+    }
 }

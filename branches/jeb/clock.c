@@ -1,8 +1,14 @@
+/***********************/
+// Clock Driver
+/***********************/
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "clock.h"
 
-
+/***********************/
+// Custom data type, used to handle time
+/***********************/
 struct Clock_time
 {
 	int seconds;
@@ -13,7 +19,7 @@ struct Clock_time
 struct Clock_time clock_time;
 
 /***********************/
-//TIME_value
+//TIME_Tick, Keeps control of time, ! Interrupt should call this function every second
 /***********************/
 void TIME_Tick (void)
 {
@@ -29,7 +35,7 @@ void TIME_Tick (void)
 		clock_time.hours++;
 		clock_time.minutes=0;
 	}
-	if (clock_time.hours == 24)
+	if (clock_time.hours >= 24)
 	{
 		clock_time.hours = 0;
 	}

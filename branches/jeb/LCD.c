@@ -1,3 +1,7 @@
+/***********************/
+// LCD DISPLAY DRIVER
+/***********************/
+
 #include <avr/io.h>
 #include <util/delay.h>
 #include <string.h>

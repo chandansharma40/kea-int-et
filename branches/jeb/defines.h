@@ -1,15 +1,9 @@
 #ifndef DEFINES_H_
 #define	DEFINES_H_
 
-
-/* 		~ All global defines goes to here
- *
- *
- *		This file should be merged with io.c/io.h 
- *
- *
- *
- */
+/***********************/
+// GLOBAL defines
+/***********************/
 
 #define F_CPU 16000000UL // 16 MHz clock speed
 
