@@ -13,6 +13,84 @@ int LCD_busy;
 int useBusy;
 
 /***********************/
+// Custom Characters
+/***********************/
+void Custom_Characters (void) 
+{
+// make CGRAM data available from MPU and set custom characters in CGRAM 1-5
+
+LCD_cmd (0x40); //starts customization at first CGRAM place
+
+// 0 bar character
+
+LCD_data (0x00);
+LCD_data (0x00);
+LCD_data (0x00);
+LCD_data (0x00);
+LCD_data (0x00);
+LCD_data (0x00);
+LCD_data (0x00);
+LCD_data (0x00);
+
+// 1 bar character
+
+LCD_data (0x10);
+LCD_data (0x10);
+LCD_data (0x10);
+LCD_data (0x10);
+LCD_data (0x10);
+LCD_data (0x10);
+LCD_data (0x10);
+LCD_data (0x00);
+
+// 2 bar character
+
+LCD_data (0x18);
+LCD_data (0x18);
+LCD_data (0x18);
+LCD_data (0x18);
+LCD_data (0x18);
+LCD_data (0x18);
+LCD_data (0x18);
+LCD_data (0x00);
+
+// 3 bar character
+
+LCD_data (0x1C);
+LCD_data (0x1C);
+LCD_data (0x1C);
+LCD_data (0x1C);
+LCD_data (0x1C);
+LCD_data (0x1C);
+LCD_data (0x1C);
+LCD_data (0x00);
+
+// 4 bar character
+
+LCD_data (0x1E);
+LCD_data (0x1E);
+LCD_data (0x1E);
+LCD_data (0x1E);
+LCD_data (0x1E);
+LCD_data (0x1E);
+LCD_data (0x1E);
+LCD_data (0x00);
+
+//5 bar character
+
+LCD_data (0x1F);
+LCD_data (0x1F);
+LCD_data (0x1F);
+LCD_data (0x1F);
+LCD_data (0x1F);
+LCD_data (0x1F);
+LCD_data (0x1F);
+LCD_data (0x00);
+
+LCD_cmd (0x80); //returns to DDRAM
+}
+
+/***********************/
 // LCD Command TX
 /***********************/
 void LCD_cmd (char x)
