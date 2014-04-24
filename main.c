@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <avr/interrupt.h>	
+#include <stdio.h>
 #include "kbd.h"
 #include "LCD.h"
 #include "sensors.h"
@@ -68,7 +69,7 @@ ISR(TIMER1_COMPA_vect)
 }
 
 /***********************/
-// µP Initialization 
+// ÂµP Initialization 
 /***********************/
 void uP_init(void)
 {
@@ -94,18 +95,14 @@ int main (void)
 
 	
 	// Set up our menu
-	LCD_goto(3,1);
-	LCD_string(":");
-	LCD_goto(6,1);
-	LCD_string(":");
+	/*
 	LCD_goto(11,1);
 	LCD_string("T:");
 	LCD_goto(15,1);
 	LCD_string(".00");
 	LCD_goto(18,1);
 	LCD_string("*");
-	LCD_goto(1,2);
-	LCD_string("LDR:");
+*/
 
 	while (1)
 	{
@@ -118,7 +115,7 @@ int main (void)
 		// Read temp, convert it and print it
 		int temp = TEMP_value(); // call the task function
 		char temp_str[4];
-		itoa(temp, temp_str, 4);
+		itoa(temp, temp_str, 10);
 		LCD_string(temp_str);
 
 		runTemp = false; // clear the run flag
@@ -127,37 +124,51 @@ int main (void)
 	//Light
 	if (runLight)
 	{
-		LCD_goto(5,2);
+		LCD_goto(1,2);
+		LCD_string("LDR:");
 
 		// Read Light, convert it and print it
 		int light_value = LIGHT_value(); // call the task function
 		char light_str[4];
-		itoa(light_value, light_str, 4);
+		sprintf(light_str, "%03d", light_value);
 		LCD_string(light_str);
 
 		runLight = false; // clear the run flag
 	}
 
+
 	//Time
 	if (runTime)
 	{
 		TIME_Tick(); // call the task function
-		char time_string[4];
+		char time_string[2]; // Only needed to hold 2 bytes
+		char *test;
+
+		LCD_goto(1,1);
+		sprintf(test, "%02d:%02d:%02d", TIME_GetHours(), TIME_GetMinutes(), TIME_GetSeconds()); 
+		LCD_string(test);
+
+		/* ===== THIIS CODE IS REPLACED BY sprintf above!!! =====
 
 		// Seconds
+		LCD_goto(6,1);
+		LCD_string(":");
 		LCD_goto(7,1);
-		itoa(TIME_GetSeconds(), time_string, 4);
+		itoa(TIME_GetSeconds(), time_string, 10);
 		LCD_string(time_string);
 
 		// Minutes
+		LCD_goto(3,1);
+	    LCD_string(":");
 		LCD_goto(4,1);
-		itoa(TIME_GetMinutes(), time_string, 4);
+		itoa(TIME_GetMinutes(), time_string, 10);
 		LCD_string(time_string);
 
  		// Hours
 		LCD_goto(1,1);
-		itoa(TIME_GetHours(), time_string, 4);
+		itoa(TIME_GetHours(), time_string, 10);
 		LCD_string(time_string);
+		*/
 
 		runTime = false; // clear the run flag
 
@@ -170,6 +181,10 @@ int main (void)
 		if (KBD_isKeyPressed())
 		{
 			keyPressed = KBD_GetKey();
+			if (keyPressed == '#')
+			{
+				LCD_BL(0);
+			}
 		}
 	}
     }
