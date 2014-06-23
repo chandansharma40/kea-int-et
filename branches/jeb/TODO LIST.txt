@@ -1,0 +1,5 @@
+1. Add BAR-Graph for the LDR
+
+2. Cursor should only be showed when asking for input!
+
+3. ?? ADC Should be reviewed and updated!
