@@ -68,7 +68,8 @@ int TIME_GetHours (void)
 /***********************/
 void TIME_SetSeconds (int value)
 {
-	clock_time.seconds = value;
+	if (value < 60)
+		clock_time.seconds = value;
 }
 
 /***********************/
@@ -76,7 +77,8 @@ void TIME_SetSeconds (int value)
 /***********************/
 void TIME_SetMinutes (int value)
 {
-	clock_time.minutes = value;
+	if (value < 60)
+		clock_time.minutes = value;
 }
 
 /***********************/
@@ -84,7 +86,8 @@ void TIME_SetMinutes (int value)
 /***********************/
 void TIME_SetHours (int value)
 {
-	clock_time.hours = value;
+	if (value < 24)
+		clock_time.hours = value;
 }
 
 

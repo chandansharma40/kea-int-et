@@ -119,7 +119,7 @@ char KBD_GetKey(void)
 		if (i==0)
 			oldResult = res;
 		
-		_delay_us(10);
+		_delay_ms(10);
 	}
 
 
@@ -130,3 +130,5 @@ char KBD_GetKey(void)
 	else
 		return 0;
 }
+
+

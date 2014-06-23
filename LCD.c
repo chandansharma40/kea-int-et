@@ -11,83 +11,60 @@
 
 int LCD_busy;
 int useBusy;
+bool lcd_backlight = true;
+
 
 /***********************/
 // Custom Characters
 /***********************/
-void Custom_Characters (void) 
+void LCD_BuildCharacter (char adress, char character[]) 
 {
-// make CGRAM data available from MPU and set custom characters in CGRAM 1-5
+	if (adress < 8)
+	{
+		LCD_cmd (0x40 + adress*8);	// Set adress to CGRAM start + offset
+	}
 
-LCD_cmd (0x40); //starts customization at first CGRAM place
+	for (int i =0; i < 7; i++)  // Print 8x1 byte
+	{
+		LCD_prt(character[i]);
+	}
 
-// 0 bar character
+	LCD_cmd (0x80); //returns to DDRAM
+}
 
-LCD_data (0x00);
-LCD_data (0x00);
-LCD_data (0x00);
-LCD_data (0x00);
-LCD_data (0x00);
-LCD_data (0x00);
-LCD_data (0x00);
-LCD_data (0x00);
+/***********************/
+// Custom Characters
+/***********************/
+void LCD_CreateCustomCharacters (void) 
+{
 
-// 1 bar character
+	// make CGRAM data available from MPU and set custom characters in CGRAM 1-5
 
-LCD_data (0x10);
-LCD_data (0x10);
-LCD_data (0x10);
-LCD_data (0x10);
-LCD_data (0x10);
-LCD_data (0x10);
-LCD_data (0x10);
-LCD_data (0x00);
+	// 0 bar character
+	// Is this neeeded?? <--- Jan
+	char char_buff_bar0[8] = { 0x00, 0x00, 0x00, 0x00, 0x00,0x00, 0x00, 0x00};
+	LCD_BuildCharacter(0, char_buff_bar0);
 
-// 2 bar character
+	// 1 bar character
+	char char_buff_bar1[8] = { 0x10, 0x10, 0x10, 0x10, 0x10,0x10, 0x10, 0x00};
+	LCD_BuildCharacter(1, char_buff_bar1);
 
-LCD_data (0x18);
-LCD_data (0x18);
-LCD_data (0x18);
-LCD_data (0x18);
-LCD_data (0x18);
-LCD_data (0x18);
-LCD_data (0x18);
-LCD_data (0x00);
+	// 2 bar character
+	char char_buff_bar2[8] = { 0x18, 0x18, 0x18, 0x18, 0x18,0x18, 0x18, 0x00};
+	LCD_BuildCharacter(2, char_buff_bar2);
 
-// 3 bar character
+	// 3 bar character
+	char char_buff_bar3[8] = { 0x1C, 0x1C, 0x1C, 0x1C, 0x1C,0x1C, 0x1C, 0x00};
+	LCD_BuildCharacter(3, char_buff_bar3);
 
-LCD_data (0x1C);
-LCD_data (0x1C);
-LCD_data (0x1C);
-LCD_data (0x1C);
-LCD_data (0x1C);
-LCD_data (0x1C);
-LCD_data (0x1C);
-LCD_data (0x00);
+	// 4 bar character
+	char char_buff_bar4[8] = { 0x1E, 0x1E, 0x1E, 0x1E, 0x1E,0x1E, 0x1E, 0x00};
+	LCD_BuildCharacter(4, char_buff_bar4);
 
-// 4 bar character
+	//5 bar character
+	char char_buff_bar5[8] = { 0x1F, 0x1F, 0x1F, 0x1F, 0x1F,0x1F, 0x1F, 0x00};
+	LCD_BuildCharacter(5, char_buff_bar5);
 
-LCD_data (0x1E);
-LCD_data (0x1E);
-LCD_data (0x1E);
-LCD_data (0x1E);
-LCD_data (0x1E);
-LCD_data (0x1E);
-LCD_data (0x1E);
-LCD_data (0x00);
-
-//5 bar character
-
-LCD_data (0x1F);
-LCD_data (0x1F);
-LCD_data (0x1F);
-LCD_data (0x1F);
-LCD_data (0x1F);
-LCD_data (0x1F);
-LCD_data (0x1F);
-LCD_data (0x00);
-
-LCD_cmd (0x80); //returns to DDRAM
 }
 
 /***********************/
@@ -134,25 +111,45 @@ void LCD_cmd (char x)
 }
 
 /***********************/
+// LCD Progess bar
+/***********************/
+void LCD_DrawBar(unsigned char percent)
+{
+	float test = percent * 0.4;
+	char progessBar[9];
+	char counter = 0;
+
+	if ( (percent < 100) && (percent > 0))
+	{
+		while (test >= 5)
+		{
+			progessBar[counter] = '5';
+			test -= 5;
+			counter++;
+		}
+
+		if (test > 0)
+		{
+			progessBar[counter] = '0' + (char)test;
+			counter++;
+		}
+
+		for (counter; counter != 8; counter++)
+			progessBar[counter] = ' ';
+
+		progessBar[counter+1] = '\0';
+		LCD_string(progessBar);
+	}
+
+}
+
+/***********************/
 // LCD Print TX
 /***********************/
 void LCD_prt (char x)
 {
  	int dummy = 0; // Used for small delay
    
-   /*count++; 
-   
-   if (count == 21)
-   {
-   LCD_goto(1, 2);
-   }
-   
-   if (count == 41)
-   {
-   LCD_goto(1, 1);
-   count = 1;
-   }*/
-    
 	// Split 8-bit command into 2 bytes with 4 bits each
 	char MSB = x & 0xF0; // mask out LSB;
 	char LSB = x << 4; // move LSB up to MSB
@@ -204,6 +201,8 @@ void LCD_init (void)
 	LCD_cmd(0x06);
 	LCD_cmd(0x0C);
 	LCD_cmd(0x01);	
+
+	 LCD_CreateCustomCharacters();
 }
 
 /***********************/
@@ -274,12 +273,23 @@ void LCD_BL(int x)
 	{
 	case 0: // Clear BL pin
 	bit_clr(PORTD, BL);
+	lcd_backlight = false;
 	break;
 
 	case 1: // Set BL pin
 	bit_set(PORTD, BL);
+	lcd_backlight = true;
 	break;
 	}
+}
+
+/***********************/
+// LCD Backlight On/Off
+/***********************/
+
+bool LCD_IsBacklightOn(void)
+{
+	return lcd_backlight;
 }
 
 

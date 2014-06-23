@@ -7,6 +7,8 @@ void LCD_string(char *str);
 void LCD_goto(int x, int y);
 void LCD_clr();
 void LCD_BL(int x);
+bool LCD_IsBacklightOn(void);
+void LCD_DrawBar(unsigned char percent);
 
 
 #endif
