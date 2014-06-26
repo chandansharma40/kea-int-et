@@ -5,7 +5,7 @@
 // GLOBAL defines
 /***********************/
 
-#define F_CPU 16000000UL // 16 MHz clock speed
+
 
 /***********************/
 // Variable Definitions

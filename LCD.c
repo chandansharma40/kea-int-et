@@ -8,29 +8,14 @@
 #include <stdlib.h>
 #include <avr/interrupt.h>
 #include "defines.h"
+#include "LCD.h"
 
 int LCD_busy;
 int useBusy;
 bool lcd_backlight = true;
 
 
-/***********************/
-// Custom Characters
-/***********************/
-void LCD_BuildCharacter (char adress, char character[]) 
-{
-	if (adress < 8)
-	{
-		LCD_cmd (0x40 + adress*8);	// Set adress to CGRAM start + offset
-	}
 
-	for (int i =0; i < 7; i++)  // Print 8x1 byte
-	{
-		LCD_prt(character[i]);
-	}
-
-	LCD_cmd (0x80); //returns to DDRAM
-}
 
 /***********************/
 // Custom Characters
@@ -39,33 +24,89 @@ void LCD_CreateCustomCharacters (void)
 {
 
 	// make CGRAM data available from MPU and set custom characters in CGRAM 1-5
+// make CGRAM data available from MPU and set custom characters in CGRAM 1-5
 
-	// 0 bar character
-	// Is this neeeded?? <--- Jan
-	char char_buff_bar0[8] = { 0x00, 0x00, 0x00, 0x00, 0x00,0x00, 0x00, 0x00};
-	LCD_BuildCharacter(0, char_buff_bar0);
+LCD_cmd (0x40); //starts customization at first CGRAM place
 
-	// 1 bar character
-	char char_buff_bar1[8] = { 0x10, 0x10, 0x10, 0x10, 0x10,0x10, 0x10, 0x00};
-	LCD_BuildCharacter(1, char_buff_bar1);
+// 0 bar character
 
-	// 2 bar character
-	char char_buff_bar2[8] = { 0x18, 0x18, 0x18, 0x18, 0x18,0x18, 0x18, 0x00};
-	LCD_BuildCharacter(2, char_buff_bar2);
+LCD_prt (0x00);
+LCD_prt (0x00);
+LCD_prt (0x00);
+LCD_prt (0x00);
+LCD_prt (0x00);
+LCD_prt (0x00);
+LCD_prt (0x00);
+LCD_prt (0x00);
 
-	// 3 bar character
-	char char_buff_bar3[8] = { 0x1C, 0x1C, 0x1C, 0x1C, 0x1C,0x1C, 0x1C, 0x00};
-	LCD_BuildCharacter(3, char_buff_bar3);
+// 1 bar character
 
-	// 4 bar character
-	char char_buff_bar4[8] = { 0x1E, 0x1E, 0x1E, 0x1E, 0x1E,0x1E, 0x1E, 0x00};
-	LCD_BuildCharacter(4, char_buff_bar4);
+LCD_prt (0x10);
+LCD_prt (0x10);
+LCD_prt (0x10);
+LCD_prt (0x10);
+LCD_prt (0x10);
+LCD_prt (0x10);
+LCD_prt (0x10);
+LCD_prt (0x00);
 
-	//5 bar character
-	char char_buff_bar5[8] = { 0x1F, 0x1F, 0x1F, 0x1F, 0x1F,0x1F, 0x1F, 0x00};
-	LCD_BuildCharacter(5, char_buff_bar5);
+// 2 bar character
 
+LCD_prt (0x18);
+LCD_prt (0x18);
+LCD_prt (0x18);
+LCD_prt (0x18);
+LCD_prt (0x18);
+LCD_prt (0x18);
+LCD_prt (0x18);
+LCD_prt (0x00);
+
+// 3 bar character
+
+LCD_prt (0x1C);
+LCD_prt (0x1C);
+LCD_prt (0x1C);
+LCD_prt (0x1C);
+LCD_prt (0x1C);
+LCD_prt (0x1C);
+LCD_prt (0x1C);
+LCD_prt (0x00);
+
+// 4 bar character
+
+LCD_prt (0x1E);
+LCD_prt (0x1E);
+LCD_prt (0x1E);
+LCD_prt (0x1E);
+LCD_prt (0x1E);
+LCD_prt (0x1E);
+LCD_prt (0x1E);
+LCD_prt (0x00);
+
+//5 bar character
+
+LCD_prt (0x1F);
+LCD_prt (0x1F);
+LCD_prt (0x1F);
+LCD_prt (0x1F);
+LCD_prt (0x1F);
+LCD_prt (0x1F);
+LCD_prt (0x1F);
+LCD_prt (0x00);
+
+// Degree sign
+LCD_prt (0x02); // 8
+LCD_prt (0x05); // 7
+LCD_prt (0x02); // 6
+LCD_prt (0x00); // 5
+LCD_prt (0x00); // 4
+LCD_prt (0x00); // 3
+LCD_prt (0x00); // 2
+LCD_prt (0x00); // 1
+
+LCD_cmd (0x80); //returns to DDRAM
 }
+
 
 /***********************/
 // LCD Command TX
@@ -111,34 +152,44 @@ void LCD_cmd (char x)
 }
 
 /***********************/
+// LCD Clear screen
+/***********************/
+void LCD_Clear(void)
+{
+	// Clear all text on display, set cursor to (1,1)
+	LCD_cmd(0x1);
+}
+
+/***********************/
 // LCD Progess bar
 /***********************/
 void LCD_DrawBar(unsigned char percent)
 {
 	float test = percent * 0.4;
-	char progessBar[9];
-	char counter = 0;
+	char *progessBar = malloc(sizeof(char)*9);
+	unsigned char counter = 0;
+
+	// Clear out bar first with spaces
+	memset(progessBar, 0x20, 8);
 
 	if ( (percent < 100) && (percent > 0))
 	{
 		while (test >= 5)
 		{
-			progessBar[counter] = '5';
+			progessBar[counter] = (unsigned char)0x5;
 			test -= 5;
 			counter++;
 		}
 
 		if (test > 0)
 		{
-			progessBar[counter] = '0' + (char)test;
+			progessBar[counter] =test;
 			counter++;
 		}
 
-		for (counter; counter != 8; counter++)
-			progessBar[counter] = ' ';
-
-		progessBar[counter+1] = '\0';
+		progessBar[8] = '\0';
 		LCD_string(progessBar);
+		free(progessBar);
 	}
 
 }
@@ -187,22 +238,51 @@ void LCD_prt (char x)
 }
 
 /***********************/
+// LCD internal reset
+/***********************/
+void LCD_reset(void)
+{
+	_delay_ms(100);
+	LCD_cmd(0x30);
+	_delay_ms(20);
+	LCD_cmd(0x30);
+	_delay_ms(10);
+	LCD_cmd(0x30);
+
+	_delay_ms(50);
+}
+
+/***********************/
 // LCD Initialization
 /***********************/
 
 void LCD_init (void)
 {
-	_delay_ms(100);
-	LCD_cmd(0x28);
-	_delay_ms(10);	
-	LCD_cmd(0x28);
-	LCD_cmd(0x28);
+	// RESET LCD before going into initialization plzz
+	LCD_reset();
 
+	// Function set - 4bit interface
+	LCD_cmd(0x28);
+	_delay_ms(10);
+
+	// Display off
+	LCD_cmd(0x08);
+	_delay_ms(10);
+
+	// Display clear
+	LCD_cmd(0x01);
+	_delay_ms(10);
+
+	// Entry mode set, increment, shifting off
 	LCD_cmd(0x06);
-	LCD_cmd(0x0C);
-	LCD_cmd(0x01);	
+	_delay_ms(10);
 
-	 LCD_CreateCustomCharacters();
+	// Done with initialization, turn on display again
+	// Display off
+	LCD_cmd(0x0C);
+	_delay_ms(10);
+		
+    LCD_CreateCustomCharacters();
 }
 
 /***********************/
