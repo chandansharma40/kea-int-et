@@ -1,6 +1,8 @@
 /***********************/
 // MAIN Program
 /***********************/
+#define F_CPU 16000000UL // 16 MHz clock speed
+
 #include "defines.h"
 #include <avr/io.h>
 #include <util/delay.h>
@@ -35,11 +37,9 @@ char countLight = 25;
 char countKey = 20;
 
 // Keyboard variabls
-unsigned char keyPressed;
+unsigned char keyPressed = 0;
 unsigned char prevKeyPressed = 'D'; // 'D' is a dummy to enable check of previous character
 
-// TESTING VARIABLES <------- DELETE THIS @ SOME TIME
-char test_counter = 0;
 
 /***********************/
 // Interrupt
@@ -88,13 +88,12 @@ void uP_init(void)
 // Main function (Program starts here) 
 /***********************/
 int main (void)
-{  
-
+	{  
 	int toggle = 1;
   	uP_init(); // Microprocessor init
 	LCD_init(); // LCD init
 	LCD_BL(toggle); // Turn on backlight
-	LCD_cmd(0x0F); // Blink cursor
+	LCD_cmd(0x0C); // No cursor 0x0C // Blink cursor 0x0F
 	timer1_init();
 
 	LCD_goto(9,2);
@@ -103,19 +102,21 @@ int main (void)
 	
 	while (1)
 	{
-
 		//Temperature
 		if (runTemp)
 		{
 			LCD_goto(11,1);
-
+			char *temp_str = malloc(sizeof(char)*9);
 			// Read temp, convert it and print it
+			
 			int temp = TEMP_value(); // call the task function
-			char temp_str[4];
-			itoa(temp, temp_str, 10);
+		    itoa(temp, temp_str, 10);
 			LCD_string("T:");
 			LCD_string(temp_str);
+			LCD_prt(0x06); // Degree sign
+			LCD_prt('C');
 
+			free(temp_str);
 			runTemp = false; // clear the run flag
 		}
 
@@ -131,19 +132,11 @@ int main (void)
 			sprintf(light_str, "%03d", light_value);
 			LCD_string(light_str);
 
-
 	  		LCD_goto(13,2);
 
 			// 500 represents light max!!
 			unsigned int light_percent = (light_value * 100) / 500;
-		/*	if (light_percent < 0)
-				light_percent = 1;
-			else if(light_percent > 100)
-				light_percent = 99;
-*/
 			LCD_DrawBar(light_percent);
-
-
 
 			runLight = false; // clear the run flag
 		}
@@ -153,15 +146,13 @@ int main (void)
 		if (runTime)
 		{
 			TIME_Tick(); // call the task function
-			char *test;
-
+			char *temp_str = malloc(sizeof(char)*9);
 			LCD_goto(1,1);
-			sprintf(test, "%02d:%02d:%02d", TIME_GetHours(), TIME_GetMinutes(), TIME_GetSeconds()); 
-			LCD_string(test);
-
-
+			sprintf(temp_str, "%02d:%02d:%02d", TIME_GetHours(), TIME_GetMinutes(), TIME_GetSeconds()); 
+			LCD_string(temp_str);
+			free(temp_str);
+		
 			runTime = false; // clear the run flag
-
 		}
 
 		// Keyboard handler
@@ -169,26 +160,23 @@ int main (void)
 		{
 				keyPressed = KBD_GetKey();
 			    if (keyPressed != 0)
-					{
+				{
 					switch(keyPressed)
 					{
 						case '#': // set time
 								if (prevKeyPressed == '#')
 								{
+										// Disable interrupts, while we are dealing with interruptions dep data
 										cli();
 										bool setTime = true;
 										bool gettingInput = true;
 										unsigned char digits[6];
+										unsigned char digit_count = 0;
 
 										LCD_goto(1, 1);
 										LCD_string("--:--:--");
 										LCD_goto(1, 1);
-									
-										unsigned char cDigit = 0;
-										unsigned char digit_count = 0;
-
-									
-									
+						
 										while (gettingInput)
 										{						
 										
@@ -235,7 +223,7 @@ int main (void)
 									}
 
 									// Now we got em all, lets attach them to the clock	
-									unsigned char buffer[3];
+								    char buffer[3];
 									buffer[0] = digits[0];
 									buffer[1] = digits[1];
 									buffer[2] = '\0';
@@ -272,6 +260,7 @@ int main (void)
 					}
 
 				prevKeyPressed = keyPressed;
+				keyPressed = 0;
 			}
 	    }
 	}

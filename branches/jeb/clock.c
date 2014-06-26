@@ -23,11 +23,12 @@ struct Clock_time clock_time;
 /***********************/
 void TIME_Tick (void)
 {
-	// Every 10 ms, 
+	// Every 1000 ms, 
 	clock_time.seconds++;
+
 	if (clock_time.seconds >= 60)
 	{
-		clock_time.seconds=0;
+ 		clock_time.seconds=0;
 		clock_time.minutes++;
 	}
 	if (clock_time.minutes >= 60)
@@ -38,6 +39,8 @@ void TIME_Tick (void)
 	if (clock_time.hours >= 24)
 	{
 		clock_time.hours = 0;
+		clock_time.minutes = 0;
+		clock_time.seconds = 0;
 	}
 }
 
@@ -103,9 +106,12 @@ void timer1_init()
 	OCR1A = 19999; //gives interrupt every 10ms
 	
 	TCNT1  = 0b00000000;
+
+
 	sei(); // enable global interrupts
 
 	clock_time.seconds = 0;
 	clock_time.minutes = 0;
 	clock_time.hours   = 0;
+
 }

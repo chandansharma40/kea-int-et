@@ -102,7 +102,7 @@ bool KBD_isKeyPressed(void)
 char KBD_GetKey(void)
 {
 	const char KeyArray[] = {'1','2','3','4','5','6','7','8','9','*','0','#'};
-	char res = 0;
+	unsigned char res = 0;
 	char dummy = 0;
 	int i = 0;
 	for (; i < 10; i++)
